@@ -146,7 +146,7 @@ void loop()
     if((y>=350) && (encPos < 400)){
       motorDo(true, 255);
     } else {
-      while(encPos > 0{
+      while(encPos > 0) {
         motorDo(true,-255);
       }
     }
