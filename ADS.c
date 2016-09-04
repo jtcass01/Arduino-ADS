@@ -143,12 +143,15 @@ void loop()
     newFlight();
     
     ///NEW CODE 9/4/2016
-    if(y >=350){
+    if((y>=350) && (encPos < 400)){
       motorDo(true, 255);
     } else {
-      motorDo(false, 0);
+      while(encPos > 0{
+        motorDo(true,-255);
+      }
     }
    }
+   //END NEW CODE 9/4/2016
 
   Serial.print("encPos = ");
   Serial.println(encPos);
