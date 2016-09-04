@@ -147,7 +147,7 @@ void loop()
       motorDo(true, 255);
     } else {
       while(encPos > 0) {
-        motorDo(true,-255);
+        motorDo(false,255);
       }
     }
    }
