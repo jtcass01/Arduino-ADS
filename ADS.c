@@ -147,7 +147,7 @@ void loop()
       motorDo(true, 255);
     } else if ((y>=350) && (encPos==400)){ //IF ALTITUDE IS ABOVE 350 AND ADS IS FULLY EXTENDED, DO NOTHING
       motorDo(true,0);
-    else {
+    } else {
       while(encPos > 0) { //WHEN ALTITUDE IS BELOW 350, CLOSE ADS.
         motorDo(false,255);
       }
