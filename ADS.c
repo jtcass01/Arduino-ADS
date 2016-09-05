@@ -143,12 +143,12 @@ void loop()
     newFlight();
     
     ///NEW CODE 9/4/2016
-    if((y>=350) && (encPos < 400)){
+    if((y>=350) && (encPos < 400)){ //IF ALTITUDE IS ABOVE 350, ACTUATE ADS TO FULL EXTENSION
       motorDo(true, 255);
-    } else if ((y>=350) && (encPos==400)){
+    } else if ((y>=350) && (encPos==400)){ //IF ALTITUDE IS ABOVE 350 AND ADS IS FULLY EXTENDED, DO NOTHING
       motorDo(true,0);
     else {
-      while(encPos > 0) {
+      while(encPos > 0) { //WHEN ALTITUDE IS BELOW 350, CLOSE ADS.
         motorDo(false,255);
       }
     }
