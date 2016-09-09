@@ -38,6 +38,7 @@ const int n = 9;         //The number of data points to read velocity from.
 unsigned long times[n];  //The n most recent times (ms).
 long alts[n];            //The n most recent altitudesAGL (mm).
 volatile int encPos = 0; //Where the encoder is (encoder units).
+bool open = false;       //Used to oscillate between opening and closing the blades.
 
 
 //CREATE BMP180 OBJECTS
@@ -102,26 +103,32 @@ void loop(void){
   updateTimesAlts();
   
   y = alts[0];
+
   if(y<0) {
     y = 0;
   }
   
   v = velocity();
 
-  
-  if(encPos == 0){ //IF BLADES ARE RETRACTED, EXTEND THEM
-    while(encPos < 400){
-      if((encPos % 2) == 0){
-        writeToFile(times[0],y,v,encPos);
-      }
-      motorDo(true,255);
+  if(open){  //IF BLADES ARE EXTENDED, RETRACT THEM
+    if((encPos % 2) == 0){   
+      writeToFile(times[0],y,v,encPos);
     }
-  } else if (encPos == 400) { //IF BLADES ARE EXTENDED, RETRACT THEM
-    while(encPos > 0){
-      if((encPos % 2) == 0){
-        writeToFile(times[0],y,v,encPos);
-      }
-      motorDo(false,255);
+    
+    motorDo(false,255);
+    
+    if(encPos == 0){
+      open = false;
+    }
+  } else {   //IF BLADES ARE RETRACTED, EXTEND THEM
+    if((encPos % 2) == 0){
+      writeToFile(times[0],y,v,encPos);
+    }
+
+    motorDo(true,255);
+    
+    if(encPos == 400){
+      open = true;
     }
   }
 }     //////////END LOOP//////////
