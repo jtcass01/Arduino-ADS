@@ -99,6 +99,16 @@ void loop(void){
     newTest();
   }  
   
+  updateTimesAlts();
+  
+  y = alts[0];
+  if(y<0) {
+    y = 0;
+  }
+  
+  v = velocity();
+
+  
   if(encPos == 0){ //IF BLADES ARE RETRACTED, EXTEND THEM
     while(encPos < 400){
       if((encPos % 2) == 0){
@@ -114,15 +124,6 @@ void loop(void){
       motorDo(false,255);
     }
   }
-  
-  updateTimesAlts();
-  
-  y = alts[0];
-  if(y<0) {
-    y = 0;
-  }
-  
-  v = velocity();
 }     //////////END LOOP//////////
 
 
