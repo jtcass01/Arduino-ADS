@@ -141,8 +141,8 @@ void loop()
     motorDo(false, 0);
     delay(1000);
     newFlight();
-    
-    ///NEW CODE 9/4/2016
+  }
+
     if((y>=350) && (encPos < 400)){ //IF ALTITUDE IS ABOVE 350, ACTUATE ADS TO FULL EXTENSION
       motorDo(true, 255);
     } else if ((y>=350) && (encPos==400)){ //IF ALTITUDE IS ABOVE 350 AND ADS IS FULLY EXTENDED, DO NOTHING
@@ -152,8 +152,6 @@ void loop()
         motorDo(false,255);
       }
     }
-   }
-   //END NEW CODE 9/4/2016
 
   Serial.print("encPos = ");
   Serial.println(encPos);
