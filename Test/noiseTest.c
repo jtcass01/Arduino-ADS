@@ -101,10 +101,16 @@ void loop(void){
   
   if(encPos == 0){ //IF BLADES ARE RETRACTED, EXTEND THEM
     while(encPos < 400){
+      if((encPos % 2) == 0){
+        writeToFile(times[0],y,v,encPos);
+      }
       motorDo(true,255);
     }
   } else if (encPos == 400) { //IF BLADES ARE EXTENDED, RETRACT THEM
     while(encPos > 0){
+      if((encPos % 2) == 0){
+        writeToFile(times[0],y,v,encPos);
+      }
       motorDo(false,255);
     }
   }
@@ -117,8 +123,6 @@ void loop(void){
   }
   
   v = velocity();
-  
-  writeToFile(times[0],y,v,encPos);
 }     //////////END LOOP//////////
 
 
