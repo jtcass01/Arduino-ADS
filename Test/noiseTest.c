@@ -117,7 +117,7 @@ void loop(void){
     
     motorDo(false,255);
     
-    if(encPos == 0){
+    if(encPos == 0){ ///IF BLADES ARE CLOSED.  SET OPEN TO FALSE
       open = false;
     }
   } else {   //IF BLADES ARE RETRACTED, EXTEND THEM
@@ -127,7 +127,7 @@ void loop(void){
 
     motorDo(true,255);
     
-    if(encPos == 400){
+    if(encPos == 400){  ///IF BLADES ARE OPEN.  SET OPEN TO TRUE
       open = true;
     }
   }
