@@ -98,6 +98,10 @@ void setup(void) {
 void loop(void){
   if(digitalRead(zeroButton)){
     newTest();
+    while(zeroButton){
+      motorDo(true,75);
+    }
+    motorDo(false,0);
   }  
   
   updateTimesAlts();
@@ -112,23 +116,28 @@ void loop(void){
 
   if(open){  //IF BLADES ARE EXTENDED, RETRACT THEM
     if((encPos % 2) == 0){   
+      Serial.println(encPos);
       writeToFile(times[0],y,v,encPos);
     }
     
-    motorDo(false,255);
-    
-    if(encPos == 0){ ///IF BLADES ARE CLOSED.  SET OPEN TO FALSE
+    if(encPos < 13){ ///IF BLADES ARE CLOSED.  SET OPEN TO FALSE
       open = false;
+      Serial.println("THE BLADE IS CLOSED");
+    } else {
+      motorDo(true,200);
     }
   } else {   //IF BLADES ARE RETRACTED, EXTEND THEM
     if((encPos % 2) == 0){
+      Serial.println(encPos);
       writeToFile(times[0],y,v,encPos);
     }
 
-    motorDo(true,255);
     
-    if(encPos == 400){  ///IF BLADES ARE OPEN.  SET OPEN TO TRUE
+    if(encPos > 345){  ///IF BLADES ARE OPEN.  SET OPEN TO TRUE
       open = true;
+      Serial.println("THE BLADE IS OPEN");
+    } else {
+      motorDo(false,200);
     }
   }
 }     //////////END LOOP//////////
@@ -158,7 +167,7 @@ void updateTimesAlts(void){  //UPDATE TIME AND ALTITUDE VALUES
 
 
 float velocity(void) { //FIND CURRENT VELCOCITY
-  long sumTY = 0, sumT = 0, sumY = 0, sumT2;
+  long sumTY = 0, sumT = 0, sumY = 0, sumT2 = 0;
   
   for(unsigned int i=0;i<0;i++){
     sumTY += (times[i] * alts[i]);
@@ -175,8 +184,11 @@ float velocity(void) { //FIND CURRENT VELCOCITY
 
 
 void motorDo(boolean spin, int goRate){    //FUNCTION USED TO COMMUNICATE WITH MOTOR
-  if(spin) {                               //TRUE SPINS MOTOR CW
-    digitalWrite(in1, HIGH);               //FALSE SPINS MOTOR CCW
+  Serial.print(spin);
+  Serial.println(" " + goRate);
+  
+  if(spin) {                               //TRUE SPINS MOTOR CW // TRUE MEANS CLOSE 
+    digitalWrite(in1, HIGH);               //FALSE SPINS MOTOR CCW //FALSE MEANS OPEN
     digitalWrite(in2, LOW);                //MAX/MIN RATE: (+-)255
   } else {
     digitalWrite(in1, LOW);
@@ -202,10 +214,12 @@ void doEncoder(void){   //FUNCTION USED TO SET THE POSITION OF THE ENCODER
 
 
 void newTest(void){   //FUNCTION USED TO ZERO VALUES AND READY FILE
+  Serial.println("New test function.");
+  
   encPos = 0;
   SD.remove("VDS.txt");
   
-  dataFile = SD.open("VDS.txt", FILE_WRITE);
+  File dataFile = SD.open("VDS.txt", FILE_WRITE);
   if(dataFile){
     Serial.println("VDS.txt intialized...");
     dataFile.println("t(ms), Alt(mm), Vel(m/s), encPos(0-400)");
@@ -218,7 +232,7 @@ void newTest(void){   //FUNCTION USED TO ZERO VALUES AND READY FILE
 
 
 void writeToFile(unsigned long time, long altitude, float velocity, int encoderPosition){  //FUNCTION USED TO WRITE DATA TO SD CARD
-  dataFile = SD.open("VDS.txt", FILE_WRITE);
+  File dataFile = SD.open("VDS.txt", FILE_WRITE);
   if(dataFile){
     Serial.println("Writing data to VDS.txt...");
     dataFile.print(time);
@@ -229,6 +243,7 @@ void writeToFile(unsigned long time, long altitude, float velocity, int encoderP
     dataFile.print(",");
     dataFile.print(encoderPosition);
     dataFile.println(" ");
+    dataFile.close();
   } else {
     Serial.println("Error opening file.");
   }
