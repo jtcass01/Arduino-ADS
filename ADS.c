@@ -138,21 +138,49 @@ void loop()
       Serial.print("encPos_ = ");
       Serial.println(encPos);
     }
+    //Serial.println("derp");
     motorDo(false, 0);
     delay(1000);
     newFlight();
-  }
-
-    if((y>=350) && (encPos < 400)){ //IF ALTITUDE IS ABOVE 350, ACTUATE ADS TO FULL EXTENSION
-      motorDo(true, 255);
-    } else if ((y>=350) && (encPos==400)){ //IF ALTITUDE IS ABOVE 350 AND ADS IS FULLY EXTENDED, DO NOTHING
-      motorDo(true,0);
-    } else {
-      while(encPos > 0) { //WHEN ALTITUDE IS BELOW 350, CLOSE ADS.
-        motorDo(false,255);
+    ////Begin new code 6/29/16
+    ////Send the blades to an extended position
+    control = 410;
+    Serial.println("ZERO!");
+    while (encPos < 375) {
+      Serial.print("encPos__ = ");
+      Serial.println(encPos);
+      motorPID.Compute();
+      if (output >= 0) {
+        motorDo(false, output);
+      }
+      else if (output < 0) {
+        motorDo(true, -1 * output);
       }
     }
+    ////retract the blades
+    Serial.println("OUT!");
+    motorDo(false, 0);
+    delay(2000);
+    control = 0;
+    while (encPos != 0) { //If you can't exit this loop change it to (encPos > 1) or something
+      Serial.println(encPos);
+      motorPID.Compute();
+      if (output >= 0) {
+        motorDo(false, output);
+      }
+      else if (output < 0) {
+        motorDo(true, -1 * output);
+      }
+    }
+    motorDo(false, 0);
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+    Serial.println("IN!");
+    delay(1000);
+    encPos = 0;
+    ////End new code 6/29/16
 
+  }
   Serial.print("encPos = ");
   Serial.println(encPos);
   updateTimesAlts();//13-14 ms low power...15-17ms standard...21-23 ms highres...33-35 ms ultra high res...(with Serial)
@@ -166,7 +194,10 @@ void loop()
   v = velocity();
 
   error = v - EEPROM.read(map(y / 1000, 0, targetAlt, 0, 1023));
-
+  //error = v - 138.50926769470171423619622043381*pow(2.71828182845904523536, 0.81814696516705309736749995863647 - 0.00051134185322940817273329210065062*y)*pow(1.0 - 1.0*pow(2.71828182845904523536, 0.0010226837064588163454665842013012*y - 1.6362939303341061947349999172729), 0.5);
+  //error=v-140.73488152897375338706591722721*exp(0.79220422544581822502348958633692 - 0.00049512764090363639063968099146057*y)*(1.0 - 1.0*exp(0.00099025528180727278127936198292115*y - 1.5844084508916364500469791726738)) ^ (1 / 2);
+  //error = v - 140.73488152897375338706591722721*pow(2.71828182845904523536, 0.79220422544581822502348958633692 - 0.00049512764090363639063968099146057*y)*pow(1.0 - 1.0*pow(2.71828182845904523536, 0.00099025528180727278127936198292115*y - 1.5844084508916364500469791726738),0.5);
+  //error = v - 140.59863437369412057268497556625*pow(2.71828182845904523536, 0.74413156962135658498169511088081 - 0.00049608771308090438998779674058721*(float)y / 1000)*pow(1.0 - 1.0*pow(2.71828182845904523536, 0.00099217542616180877997559348117442*(float)y / 1000 - 1.4882631392427131699633902217616), 0.5);
   control = 100 * pGain * error;
   if ((control > 100) || (y > 1300000L)) {
     control = 100;
@@ -177,13 +208,13 @@ void loop()
   control = control * 4;
 
   //PID
-  //motorPID.Compute();
-  //if (output >= 0) {
-  //  motorDo(false, output);
-  //}
-  //else if (output < 0) {
-  //  motorDo(true, -1 * output);
-  //}
+  motorPID.Compute();
+  if (output >= 0) {
+    motorDo(false, output);
+  }
+  else if (output < 0) {
+    motorDo(true, -1 * output);
+  }
 
   cardPrint(error, control, v);
 }
@@ -270,7 +301,6 @@ void cardPrint(float error, int control, float velocity) {
 void doEncoder() {
   /* If pinA and pinB are both high or both low, it is spinning
     forward. If they're different, it's going backward.
-
     For more information on speeding up this process, see
     [Reference/PortManipulation], specifically the PIND register.
   */
@@ -293,8 +323,6 @@ void motorDo(boolean spin, int goRate) {
   }
   analogWrite(actuatorPWM, goRate);
 }
-
-
 
 //void EEPROMWriteLong(int address, long value) {
 //	//Decomposition from a long to 4 bytes by using bitshift.
@@ -330,48 +358,3 @@ void motorDo(boolean spin, int goRate) {
 //  int v;
 //  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 //}
-
-
-/*     OLD MOVEMENTS OF MOTOR.
-   MOVE THE BLADES TO AN EXTENDED POSITION
-    control = 410;
-    Serial.println("ZERO!");
-    while (encPos < 375) {
-      Serial.print("encPos__ = ");
-      Serial.println(encPos);
-      motorPID.Compute();
-      if (output >= 0) {
-        motorDo(false, output);
-      }
-      else if (output < 0) {
-        motorDo(true, -1 * output);
-      }
-    }
-    
-    
-    
-    ////RETRACT THE BLADES
-    Serial.println("OUT!");
-    motorDo(false, 0);
-    delay(2000);
-    control = 0;
-    while (encPos != 0) { //If you can't exit this loop change it to (encPos > 1) or something
-      Serial.println(encPos);
-      motorPID.Compute();
-      if (output >= 0) {
-        motorDo(false, output);
-      }
-      else if (output < 0) {
-        motorDo(true, -1 * output);
-      }
-    }
-    motorDo(false, 0);
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, LOW);
-    Serial.println("IN!");
-    delay(1000);
-    encPos = 0;
-    
-*/
-
-
